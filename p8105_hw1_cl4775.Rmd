@@ -5,25 +5,67 @@ date: "2025-09-20"
 ---
 
 ```{r setup, include=FALSE}
+library(tidyverse)
+library(moderndive)
+data("early_january_weather")
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+# Problem 1
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## Dataset Summary 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+The dataset has `r nrow(early_january_weather)` rows and `r ncol(early_january_weather)` columns.  
+The mean temperature is `r mean(early_january_weather$temp, na.rm = TRUE)`.
 
-```{r cars}
-summary(cars)
+**Variables include:**
+
+- `temp` – Temperature
+- `humid` – Humidity
+- `time_hour` – Hour of observation
+
+```{r scatterplot, fig.width=6, fig.height=4}
+ggplot(early_january_weather, aes(x = hour, y = temp, color = humid)) +
+  geom_point() +
+  labs(
+  x = "Hour of Day",
+  y = "Temperature",
+  color = "Humidity"
+  ) +
+  theme_minimal()
+
+ggsave("scatterplot_temp_vs_hour.png", width = 6, height = 4)
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+As we can see from the generated plot, in general, temperature rises in the middle of the day, and is lower at the beginning and end of days. 
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+
+# Problem 2
+
+```{r}
+df <- tibble(
+  sample = rnorm(10),
+  is_positive = sample > 0,
+  chars = letters[1:10],
+  factors = factor(rep(c("A","B","C"), length.out = 10))
+)
+
+
+#test mean 
+mean(df %>% pull(sample))        # works
+mean(df %>% pull(is_positive))   # works (TRUE -> 1, FALSE -> 0)
+mean(df %>% pull(chars))         # returns NA with warning
+mean(df %>% pull(factors))       # returns NA with warning
+
+#test coercion
+as.numeric(df$is_positive)  # TRUE=1, FALSE=0
+as.numeric(df$chars)        # NA with warning
+as.numeric(df$factors)      # integers representing factor levels
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+When trying to take the mean of data set, some variables work while others don't, since mean() only works on numeric or logical vectors. When the characters are not numbers, mean() cannot compute a value. Coersion helps demonstrate that variable types matter when performing calculations in R and for the wrong variable type an error would occur. 
+
+
+
